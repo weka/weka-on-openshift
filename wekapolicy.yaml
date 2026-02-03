@@ -4,7 +4,7 @@ metadata:
   name: weka-drivers
   namespace: weka-operator-system
 spec:
-  image: quay.io/weka.io/weka-in-container:4.4.10.118
+  image: quay.io/weka.io/weka-in-container:4.4.10.183
   imagePullSecret:  "quay-io-robot-secret"
   payload:
     driverDistPayload: {}
