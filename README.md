@@ -4,10 +4,13 @@ This README explains the steps to be taken to deploy WEKA on OpenShift 4.20 and 
 # PREREQUISITES
 
 - A working OpenShift cluster. A non-HCP cluster is required.
+  - 6 nodes recommended (3 control plane + 3 worker nodes).
+  - Minimum 12 vCPUs per node (16 recommended).
+- Access to host ports 14000 - 40000. If using a cloud service provider like AWS, add rules in appropriate Security Groups.
 
-  *UPDATE: Hosted Control Plane clusters do not work, on account of certain required CRDs not being exposed (such as `MachineConfig`)*
+  *UPDATE: Hosted Control Plane clusters do not work, on account of certain required CRDs not being exposed (such as `MachineConfig`), making it hard to update HugePagesConfig*
 
-# STEPS
+# STEPS TO DEPLOY WEKACLUSTER
 
 0.1 Make Master nodes scheduleable. For workloads on Master nodes that require access to WEKA storage, this makes sense.
 
@@ -23,7 +26,7 @@ oc create -f worker-hpc.yaml
 oc create -f master-hpc.yaml
 ```
 
-2. Deploy WEKA Operator v1.9.0 or newer:
+1. Deploy WEKA Operator v1.9.0 or newer:
 
 ```
 helm upgrade --create-namespace \
@@ -125,4 +128,14 @@ Observe the progression of cluster deployment with:
 ```
 watch oc get pods,wekacluster -n weka-operator-system
 ```
-wekaCluster should progress through the following stages: `Init`, `ReadyForIO`, `Ready`
+wekaCluster should progress through the following stages: `Init`, `ReadyForIO`, `StartingIO`, and `Ready`
+
+The wekaCluster is installed and ready when it reports the `Ready` status.
+
+```
+oc get wekacluster
+NAME          STATUS   CLUSTER ID                             CCT(A/C/D)   DCT(A/C/D)   DRVS(A/C/D)
+cluster-dev   Ready    99ac745a-ecf9-4a67-85ce-80b9a7132442   6/6/6        6/6/6        6/6/6
+```
+
+4. Create a wekaClient and access storage from the wekaCluster
