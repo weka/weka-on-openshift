@@ -9,7 +9,7 @@ spec:
     computeContainers: 6
     driveContainers: 6
     driveCores: 1
-  image: quay.io/weka.io/weka-in-container:4.4.10.118 # Replace with actual image tag
+  image: quay.io/weka.io/weka-in-container:4.4.10.183 # Replace with actual image tag
   driversDistService: "https://drivers.weka.io"
   imagePullSecret: "quay-io-robot-secret" # Replace with the actual secret
   network:
