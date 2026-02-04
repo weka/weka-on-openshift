@@ -1,6 +1,18 @@
 # WEKA On OpenShift
 This README explains the steps to be taken to deploy WEKA on OpenShift 4.20 and above.
 
+> [!WARNING]
+> Deploying a wekaClient is NOT successful today.
+> While it is possible to deploy a working wekaCluster, deploying a wekaClient today errors out with the following message.
+> ```
+> Status:
+>   Conditions:
+>     Last Transition Time:  2026-02-04T16:29:05Z
+>     Message:               error reconciling object during phase DeployCsi: error reconciling object
+>     during phase DeployCsiController: failed to create CSI controller deployment: deployments.apps
+>     "cluster-dev-weka-operator-system-weka-csi-controller" is forbidden: cannot set blockOwnerDeletion if
+>     an ownerReference refers to a resource you can't set finalizers on: , <nil>
+    
 # PREREQUISITES
 
 - A working OpenShift cluster. A non-HCP cluster is required.
@@ -139,3 +151,6 @@ cluster-dev   Ready    99ac745a-ecf9-4a67-85ce-80b9a7132442   6/6/6        6/6/6
 ```
 
 4. Create a wekaClient and access storage from the wekaCluster
+```
+oc create -f wekaclient-def.yaml
+```
