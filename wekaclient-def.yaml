@@ -1,0 +1,16 @@
+---
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaClient
+metadata:
+  name: cluster-dev-clients
+  namespace: weka-operator-system
+spec:
+  image: quay.io/weka.io/weka-in-container:4.4.10.183
+  imagePullSecret: "quay-io-robot-secret" # Replace with the actual value
+  driversDistService: "https://drivers.weka.io"
+  portRange:
+    basePort: 46000
+  wekaSecretRef: weka-client-cluster-dev # Must match secret name created using secret yaml
+  targetCluster:
+    name: cluster-dev
+    namespace: weka-operator-system
