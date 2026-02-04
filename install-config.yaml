@@ -1,0 +1,45 @@
+additionalTrustBundlePolicy: Proxyonly
+apiVersion: v1
+baseDomain: ${DOMAIN}
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+  name: worker
+  platform:
+    aws:
+      zones:
+        - us-east-2a
+      type: i3.4xlarge
+      rootVolume:
+        size: 100
+  replicas: 3
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  platform:
+    aws:
+      zones:
+        - us-east-2a
+      type: i3.4xlarge
+      rootVolume:
+        size: 100
+  replicas: 3
+metadata:
+  creationTimestamp: null
+  name: ocp4cluster
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.0.0/16
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  aws:
+    region: us-east-2
+    vpc: {}
+publish: External
+pullSecret: ${PULL_SECRET}
