@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+  name: pvc-weka
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: weka-cluster-dev-weka-operator-system-default
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-weka
+spec:
+  volumes:
+  - name: vol1
+    persistentVolumeClaim:
+      claimName: pvc-weka
+  containers:
+  - name: busybox
+    image: busybox
+    command: [ "sh", "-c", "sleep 1h" ]
+    volumeMounts:
+    - name: vol1
+      mountPath: /data/demo
