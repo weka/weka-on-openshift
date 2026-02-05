@@ -1,17 +1,5 @@
 # WEKA On OpenShift
 This README explains the steps to be taken to deploy WEKA on OpenShift 4.20 and above.
-
-> [!WARNING]
-> Deploying a wekaClient is NOT successful today.
-> While it is possible to deploy a working wekaCluster, deploying a wekaClient today errors out with the following message.
-> ```
-> Status:
->   Conditions:
->     Last Transition Time:  2026-02-04T16:29:05Z
->     Message:               error reconciling object during phase DeployCsi: error reconciling object
->     during phase DeployCsiController: failed to create CSI controller deployment: deployments.apps
->     "cluster-dev-weka-operator-system-weka-csi-controller" is forbidden: cannot set blockOwnerDeletion if
->     an ownerReference refers to a resource you can't set finalizers on: , <nil>
     
 # PREREQUISITES
 
@@ -154,3 +142,50 @@ cluster-dev   Ready    99ac745a-ecf9-4a67-85ce-80b9a7132442   6/6/6        6/6/6
 ```
 oc create -f wekaclient-def.yaml
 ```
+Ensure `udpMode: true` in your wekaClient definition.
+
+> [!WARNING]
+> Version v1.9.0 of weka operator requires a fix for CSI deployments to succeed.
+> `weka-operator-manager-role` ClusterRole must be patched to address perms issue.
+> ```
+> oc edit clusterrole weka-operator-manager-role
+> ```
+> Add the following block to your clusterRole definition:
+> ```
+> - apiGroups:
+>   - apps
+>   resources:
+>   - deployments/finalizers
+>   verbs:
+>   - update
+>   - patch
+> ```
+
+5. Confirm CSI driver is up and running
+
+```
+oc get csidriver
+NAME                                       ATTACHREQUIRED   PODINFOONMOUNT   STORAGECAPACITY   TOKENREQUESTS   REQUIRESREPUBLISH   MODES        AGE
+cluster-dev.weka-operator-system.weka.io   true             true             false             <unset>         false               Persistent   33m
+```
+```
+ oc get deployment
+NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
+cluster-dev-management-proxy                           2/2     2            2           63m
+cluster-dev-weka-operator-system-weka-csi-controller   2/2     2            2           20m
+monitoring-cluster-dev                                 0/1     1            0           68m
+weka-operator-controller-manager                       1/1     1            1           96m
+```
+6. Create a Pod and PVC
+```
+oc create -f pvcandpod.yaml
+```
+```
+ oc get pvc,pod -n default
+NAME                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                                    VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/pvc-weka   Bound    pvc-483a1f1f-cf28-4d4d-b9f7-6543241cae9f   5Gi        RWX            weka-cluster-dev-weka-operator-system-default   <unset>                 21s
+
+NAME           READY   STATUS    RESTARTS   AGE
+pod/pod-weka   1/1     Running   0          21s
+```
+
