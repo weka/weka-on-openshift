@@ -2,9 +2,9 @@
 
 This README explains the steps to be taken to deploy WEKA on OpenShift.
 
-WEKA is a high-performance filesystem that is fully containerized. Deploy and maintain storage clusters using the WEKA Operator. Clusters are YAML-based, making automation a reality.
+[WEKA](https://www.weka.io/) is a high-performance filesystem that is fully containerized. Deploy and maintain storage clusters using the [WEKA Operator](https://docs.weka.io/kubernetes/composable-clusters-for-multi-tenancy-in-kubernetes). Clusters are YAML-based, making automation a reality.
 
-OpenShift is an enterprise-grade container orchestrator, built and maintained by Red Hat.
+[OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is an enterprise-grade container orchestrator, built and maintained by Red Hat.
     
 # PREREQUISITES
 
