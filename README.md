@@ -1,35 +1,58 @@
 # WEKA On OpenShift
-This README explains the steps to be taken to deploy WEKA on OpenShift 4.20 and above.
+
+This README explains the steps to be taken to deploy WEKA on OpenShift.
+
+WEKA is a high-performance filesystem that is fully containerized. Deploy and maintain storage clusters using the WEKA Operator. Clusters are YAML-based, making automation a reality.
+
+OpenShift is an enterprise-grade container orchestrator, built and maintained by Red Hat.
     
 # PREREQUISITES
 
-- A working OpenShift cluster. A non-HCP cluster is required.
+- A working OpenShift cluster. A non-Hosted Control Plane cluster is required.
   - 6 nodes recommended (3 control plane + 3 worker nodes).
   - Minimum 12 vCPUs per node (16 recommended).
 - Access to host ports 14000 - 40000. If using a cloud service provider like AWS, add rules in appropriate Security Groups.
 
-  *UPDATE: Hosted Control Plane clusters do not work, on account of certain required CRDs not being exposed (such as `MachineConfig`), making it hard to update HugePagesConfig*
+## SUPPORTED OPENSHIFT VERSIONS AND DEPLOYMENTS
+Versions `4.17` and above are known to work with WEKA.
+
+Self-managed OpenShift installs are known to work with WEKA. Bare-metal deployments and user provisioned infrastructure on clouds fall in this category.
+
+Fully-managed OpenShift installs (ROSA, ARO, OpenShift on IBM Cloud, OpenShift Dedicated) are NOT known to work. This is due to lack of master node access.
+
+>[!WARNING]
+> Hosted Control Plane clusters do not work, on account of certain required CRDs not being exposed (such as `MachineConfig`), making it hard to update HugePagesConfig.
+
+## SUPPORTED WEKA VERSIONS
+Versions `v1.9.0` and later are known to work with OpenShift.
+
+It is **always** recommended to use the most recent available version of the WEKA Operator. Releases are published here: <https://get.weka.io/ui/operator>.
 
 # STEPS TO DEPLOY WEKACLUSTER
 
-0.1 Make Master nodes scheduleable. For workloads on Master nodes that require access to WEKA storage, this makes sense.
+Assuming a working OpenShift cluster is available, here are the steps to deploy a wekaCluster.
+
+## 0.1 Make Master nodes scheduleable
+For workloads on Master nodes that require access to WEKA storage, this makes sense.
 
 ```
-oc edit schedulers.config.openshift.io cluster
+$ oc edit schedulers.config.openshift.io cluster
 Make mastersSchedulable: true
 ```
 
-0.2 Update hugePages config on worker and master nodes.
+## 0.2 Update hugePages config on worker and master nodes
+As described in the [docs](https://docs.weka.io/kubernetes/weka-operator-deployments#kubernetes-cluster-and-node-requirements), set the desired number of hugePages on all nodes in the OpenShift cluster.
 
 ```
-oc create -f worker-hpc.yaml
-oc create -f master-hpc.yaml
+$ oc create -f worker-hpc.yaml
+$ oc create -f master-hpc.yaml
 ```
 
-1. Deploy WEKA Operator v1.9.0 or newer:
+## 1. Deploy WEKA Operator v1.9.0 or newer:
+Use Helm to install the WEKA operator.
 
 ```
-helm upgrade --create-namespace \
+$ helm upgrade --create-namespace \
     --install weka-operator oci://quay.io/weka.io/helm/weka-operator \
     --namespace weka-operator-system \
     --version v1.9.0 \
@@ -37,7 +60,7 @@ helm upgrade --create-namespace \
 ```
 Upon deploying, you should observe the following output:
 ```
-helm upgrade --create-namespace \
+$ helm upgrade --create-namespace \
     --install weka-operator oci://quay.io/weka.io/helm/weka-operator \
     --namespace weka-operator-system \
     --version v1.9.0 \
@@ -64,7 +87,7 @@ Release: weka-operator
 ```
 Confirm the operator is up and running:
 ```
-oc get pods -n weka-operator-system
+$ oc get pods -n weka-operator-system
 
 NAME                                                READY   STATUS    RESTARTS   AGE
 weka-operator-controller-manager-5ddf4d4b8d-8b49z   2/2     Running   0          30s
@@ -76,39 +99,36 @@ weka-operator-node-agent-v7qnd                      1/1     Running   0         
 
 You should see 1 controller pod + `n` node pods (where `n` equals number of OpenShift nodes)
 
-2. Create wekaPolicy objects:
-
+## 2. Elevate permissions of `weka-operator-controller-manager` Service Account
+Necessary to sign and discover storage drives attached to each OpenShift node.
+Run the following command:
 ```
-oc create -f wekapolicy.yaml
-```
-The wekaPolicy objects sign available hard drives and use them to build a wekaCluster. 
-However, today, it errors out. This is because of insufficient permissions.
-
-Today, you can confirm this by observing the logs of the controller pod after wekaPolicies are created.
-
-```
-22:59:09 ERR WekaContainerReconcile > Error processing reconciliation steps error="error reconciling object WekaContainer:weka-operator-system:weka-sign-and-discover-drives-ip-10-0-30-6.us-east-2.compute.internal during phase ensurePod-fm: Failed to create pod: pods \"weka-sign-and-discover-drives-ip-10-0-30-6.us-east-2.compute.internal\" is forbidden: unable to validate against any security context constraint: [provider \"anyuid\": Forbidden: not usable by user or serviceaccount, provider restricted-v2: .spec.securityContext.hostPID: Invalid value: true: Host PID is not allowed to be used, spec.volumes[1]: Invalid value: \"hostPath\": hostPath volumes are not allowed to be used, spec.volumes[2]: Invalid value: \"hostPath\": hostPath volumes are not allowed to be used, spec.volumes[3]: Invalid value: \"hostPath\": hostPath volumes are not allowed to be used, spec.volumes[4]: Invalid value: \"hostPath\": hostPath volumes are not allowed to be used, provider restricted-v2: .containers[0].privileged: Invalid value: true: Privileged containers are not allowed, provider restricted-v2: .containers[0].hostPID: Invalid value: true: Host PID is not allowed to be used, provider \"restricted-v3\": Forbidden: not usable by user or serviceaccount, provider \"restricted\": Forbidden: not usable by user or serviceaccount, provider \"nested-container\": Forbidden: not usable by user or serviceaccount, provider \"nonroot-v2\": Forbidden: not usable by user or serviceaccount, provider \"nonroot\": Forbidden: not usable by user or serviceaccount, provider \"hostmount-anyuid\": Forbidden: not usable by user or serviceaccount, provider \"hostmount-anyuid-v2\": Forbidden: not usable by user or serviceaccount, provider \"machine-api-termination-handler\": Forbidden: not usable by user or serviceaccount, provider \"hostnetwork-v2\": Forbidden: not usable by user or serviceaccount, provider \"hostnetwork\": Forbidden: not usable by user or serviceaccount, provider \"hostaccess\": Forbidden: not usable by user or serviceaccount, provider \"insights-runtime-extractor-scc\": Forbidden: not usable by user or serviceaccount, provider weka-operator-controller-manager-scc: .spec.securityContext.hostPID: Invalid value: true: Host PID is not allowed to be used, provider weka-operator-controller-manager-scc: .containers[0].hostPID: Invalid value: true: Host PID is not allowed to be used, provider \"csi-wekafs-controller-scc\": Forbidden: not usable by user or serviceaccount, provider \"csi-wekafs-node-scc\": Forbidden: not usable by user or serviceaccount, provider \"node-exporter\": Forbidden: not usable by user or serviceaccount, provider \"weka-operator-maintenance-scc\": Forbidden: not usable by user or serviceaccount, provider \"privileged\": Forbidden: not usable by user or serviceaccount]" container_name=weka-sign-and-discover-drives-ip-10-0-30-6.us-east-2.compute.internal deployment_identifier=231b9f2f-f134-4b00-ae5c-6fc7a1b4f5df namespace=weka-operator-system
-```
-In order to fix this, assign the `privileged` SCC to the `default` ServiceAccount in the `weka-operator-system` Project:
-```
-✗ oc adm policy add-scc-to-user privileged -z
+$ oc adm policy add-scc-to-user privileged -z
 weka-operator-controller-manager
 
 clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "weka-operator-controller-manager"
 ```
-Now, try deleting and re-creating the wekaPolicy. Confirm the wekaPolicy worked as expected:
+
+## 3. Create wekaPolicy
+A wekaPolicy is used to identify the drives that will be a part of the storage cluster.
+```
+$ oc create -f wekapolicy.yaml
+```
+
+Confirm the wekaPolicy worked as expected:
 
 ```
-oc describe node | grep weka.io/
+$ oc describe node | grep weka.io/
 ```
 Each node should have the following annotations added to them after a successful wekaPolicy execution:
 - `weka.io/weka-drives`
 - `weka.io/sign-drives-hash`
 - `weka.io/discovery.json`
 
-You can confirm this by executing the following command, which returns all nodes which have the `weka.io/weka-drives` annotation applied:
+You can confirm this by executing the following command, which returns all nodes that have the `weka.io/weka-drives` annotation applied. For example:
+
 ```
-oc get nodes -o json | jq -r '.items[] | select(.metadata.annotations."weka.io/weka-drives") | .metadata.name'
+$ oc get nodes -o json | jq -r '.items[] | select(.metadata.annotations."weka.io/weka-drives") | .metadata.name'
 
 ip-10-0-12-29.us-east-2.compute.internal
 ip-10-0-30-6.us-east-2.compute.internal
@@ -118,37 +138,41 @@ ip-10-0-52-68.us-east-2.compute.internal
 ip-10-0-56-107.us-east-2.compute.internal
 ```
 
-You can also check the output of `oc get wekaPolicy --all-namespaces`
+You can also check the output of `oc get wekaPolicy --all-namespaces`. A successful policy run is indicated by its `Status` field.
 
-3. Create a wekaCluster object:
+## 4. Create a wekaCluster
+You are now ready to create a cluster! Execute the following command:
 ```
-oc create -f wekacluster.yaml
+$ oc create -f wekacluster.yaml
 ```
 Observe the progression of cluster deployment with:
 ```
-watch oc get pods,wekacluster -n weka-operator-system
+$ watch oc get pods,wekacluster -n weka-operator-system
 ```
 wekaCluster should progress through the following stages: `Init`, `ReadyForIO`, `StartingIO`, and `Ready`
 
 The wekaCluster is installed and ready when it reports the `Ready` status.
 
 ```
-oc get wekacluster
+$ oc get wekacluster
 NAME          STATUS   CLUSTER ID                             CCT(A/C/D)   DCT(A/C/D)   DRVS(A/C/D)
 cluster-dev   Ready    99ac745a-ecf9-4a67-85ce-80b9a7132442   6/6/6        6/6/6        6/6/6
 ```
 
-4. Create a wekaClient and access storage from the wekaCluster
+## 5. Create a wekaClient and access the wekaCluster
+To access the cluster, a wekaClient must be created. Creating a wekaClient kicks off the CSI driver deployment.
+Use the command below to deploy a wekaClient:
 ```
-oc create -f wekaclient-def.yaml
+$ oc create -f wekaclient-def.yaml
 ```
-Ensure `udpMode: true` in your wekaClient definition.
+>[!WARNING]
+> Ensure `udpMode: true` in your wekaClient definition.
 
 > [!WARNING]
-> Version v1.9.0 of weka operator requires a fix for CSI deployments to succeed.
-> `weka-operator-manager-role` ClusterRole must be patched to address perms issue.
+> Version `v1.9.0` of WEKA operator requires a fix for CSI deployments to succeed.
+> `weka-operator-manager-role` ClusterRole must be patched to address a permission issue.
 > ```
-> oc edit clusterrole weka-operator-manager-role
+> $ oc edit clusterrole weka-operator-manager-role
 > ```
 > Add the following block to your clusterRole definition:
 > ```
@@ -161,22 +185,22 @@ Ensure `udpMode: true` in your wekaClient definition.
 >   - patch
 > ```
 
-5. Confirm CSI driver is up and running
-
+## 6. Confirm CSI driver is up and running
 ```
-oc get csidriver
+$ oc get csidriver
 NAME                                       ATTACHREQUIRED   PODINFOONMOUNT   STORAGECAPACITY   TOKENREQUESTS   REQUIRESREPUBLISH   MODES        AGE
 cluster-dev.weka-operator-system.weka.io   true             true             false             <unset>         false               Persistent   33m
 ```
 ```
- oc get deployment
+ $ oc get deployment
 NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
 cluster-dev-management-proxy                           2/2     2            2           63m
 cluster-dev-weka-operator-system-weka-csi-controller   2/2     2            2           20m
 monitoring-cluster-dev                                 0/1     1            0           68m
 weka-operator-controller-manager                       1/1     1            1           96m
 ```
-6. Create a Pod and PVC
+## 7. Create a Pod and PVC
+Finally, provision storage for a pod from the wekaCluster.
 ```
 oc create -f pvcandpod.yaml
 ```
@@ -188,4 +212,4 @@ persistentvolumeclaim/pvc-weka   Bound    pvc-483a1f1f-cf28-4d4d-b9f7-6543241cae
 NAME           READY   STATUS    RESTARTS   AGE
 pod/pod-weka   1/1     Running   0          21s
 ```
-
+The pod is up and running! You are ready for more serious workloads.
