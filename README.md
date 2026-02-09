@@ -23,6 +23,10 @@ Fully-managed OpenShift installs (ROSA, ARO, OpenShift on IBM Cloud, OpenShift D
 >[!WARNING]
 > Hosted Control Plane clusters do not work, on account of certain required CRDs not being exposed (such as `MachineConfig`), making it hard to update HugePagesConfig.
 
+## SUPPORTED HOST OPERATING SYSTEMS
+Ubuntu and CoreOS.
+OpenShift uses CoreOS by default.
+
 ## SUPPORTED WEKA VERSIONS
 Versions `v1.9.0` and later are known to work with OpenShift.
 
