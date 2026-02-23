@@ -32,11 +32,34 @@ Versions `v1.9.0` and later are known to work with OpenShift.
 
 It is **always** recommended to use the most recent available version of the WEKA Operator. Releases are published here: <https://get.weka.io/ui/operator>.
 
+# STEPS TO DEPLOY AN OPENSHIFT CLUSTER
+
+1. Create a Red Hat account. Visit console.redhat.com and follow the instructions to create a user account.
+
+2. Log in to console.redhat.com and create a cluster appropriately.
+
+![Openshift-cluster-create](https://github.com/user-attachments/assets/14c77bba-640c-4731-a56f-ef18fb67723d)
+
+3. If provisioning infrastrucure, download the `openshift installer` and generate an `install-config.yaml`.
+
+![Generate-install-config](https://github.com/user-attachments/assets/60cc3cb4-8c03-4f2e-ba6a-bf25cf6ade1b)
+
+4. Create an OpenShift cluster by using `openshift-install create cluster`.
+
+![Openshift-install-cluster-create](https://github.com/user-attachments/assets/982ad92d-4e96-4609-b858-958a9f037049)
+
+5. Once the cluster is created (takes 40 minutes or so), you can access the cluster.
+
+![access-openshift-cluster](https://github.com/user-attachments/assets/83d84023-49ec-42da-aa33-7ca4548e3040)
+
 # STEPS TO DEPLOY WEKACLUSTER
 
 Assuming a working OpenShift cluster is available, here are the steps to deploy a wekaCluster.
 
 ## 0.1 Make Master nodes scheduleable
+
+![update-scheduler](https://github.com/user-attachments/assets/c206aa35-f25b-47eb-bfb7-f0d8603bbcdd)
+
 For workloads on Master nodes that require access to WEKA storage, this makes sense.
 
 ```
@@ -45,6 +68,10 @@ Make mastersSchedulable: true
 ```
 
 ## 0.2 Update hugePages config on worker and master nodes
+
+![update-huge-pages-config](https://github.com/user-attachments/assets/247c15a9-6974-41fa-96ff-05261ef4696c)
+
+
 As described in the [docs](https://docs.weka.io/kubernetes/weka-operator-deployments#kubernetes-cluster-and-node-requirements), set the desired number of hugePages on all nodes in the OpenShift cluster.
 
 ```
