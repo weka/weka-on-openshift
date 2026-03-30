@@ -1,4 +1,8 @@
 #!/bin/bash
+
+##This script creates an OpenShift cluster with ARM instances for you##
+##Best used on a free AWS Graviton bastion host or on a mac with ARM chip###
+
 #Adjust these variables
 # set aws access variables
 export AWS_ACCESS_KEY_ID=""
