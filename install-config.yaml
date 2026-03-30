@@ -1,6 +1,6 @@
 additionalTrustBundlePolicy: Proxyonly
 apiVersion: v1
-baseDomain: ${DOMAIN}
+baseDomain: ${DOMAIN} #To be replaced with your domain name. Use a Route53 domain in AWS.
 compute:
 - architecture: amd64
   hyperthreading: Enabled
@@ -42,4 +42,4 @@ platform:
     region: us-east-2
     vpc: {}
 publish: External
-pullSecret: ${PULL_SECRET}
+pullSecret: ${PULL_SECRET} #To be replaced with PullSecret from console.redhat.com. Must enclose payload within single quotes: ''
