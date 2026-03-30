@@ -9,7 +9,7 @@ compute:
     aws:
       zones:
         - us-east-2a
-      type: i3.4xlarge
+      type: im4gn.4xlarge
       rootVolume:
         size: 100
   replicas: 3
@@ -21,7 +21,7 @@ controlPlane:
     aws:
       zones:
         - us-east-2a
-      type: i3.4xlarge
+      type: im4gn.4xlarge
       rootVolume:
         size: 100
   replicas: 3
