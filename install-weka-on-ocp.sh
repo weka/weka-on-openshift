@@ -36,6 +36,10 @@ echo "\n\nChecking if kubectl is installed...\n\n"
 command -v kubectl version >/dev/null 2>&1 || { echo >&2 "Kubectl is required but not installed yet... download and install: https://kubernetes.io/docs/tasks/tools/"; exit; }
 echo "\n\nkubectl good to go!...\n\n"
 
+# Log in to OpenShift with cluster-admin or kube-admin privileges!
+echo "Log in to cluster"
+command oc login --token=sha256~xxxxxxxFGLGhhet3mAXVLBfkSw --server=https://api.ocp4cluster.balarcert.com:6443
+
 ## Access k8s cluster.
 echo "\n\nStatus of nodes in the cluster....\n\n"
 
@@ -66,9 +70,13 @@ echo "\n\nProceeding to deploy Weka operator version ${WEKA_OPERATOR_VERSION}...
 
 command helm upgrade --create-namespace --kubeconfig "${KUBECONFIG}" --install weka-operator oci://quay.io/weka.io/helm/weka-operator --namespace weka-operator-system --version ${WEKA_OPERATOR_VERSION:=v1.10.5} --set csi.installationEnabled=true
 
+echo "Elevate permissions of weka-controller-manager and weka-operator-maintenance service accounts\n"
+command oc adm policy add-scc-to-user privileged -z weka-operator-controller-manager -n weka-operator-system
+command oc adm policy add-scc-to-user privileged -z weka-operator-maintenance -n weka-operator-system
+
 echo "\n\nWeka operator deployment complete...\n\n"
 
-sleep 2s
+sleep 23s
 
 echo "\n\nExamining status of pods in weka-operator-system namespace...Pods should be up and running...\n\n"
 
