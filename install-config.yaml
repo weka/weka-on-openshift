@@ -2,7 +2,7 @@ additionalTrustBundlePolicy: Proxyonly
 apiVersion: v1
 baseDomain: ${DOMAIN} #To be replaced with your domain name. Use a Route53 domain in AWS.
 compute:
-- architecture: amd64
+- architecture: arm64
   hyperthreading: Enabled
   name: worker
   platform:
@@ -14,7 +14,7 @@ compute:
         size: 100
   replicas: 3
 controlPlane:
-  architecture: amd64
+  architecture: arm64
   hyperthreading: Enabled
   name: master
   platform:
