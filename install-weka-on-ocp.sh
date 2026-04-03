@@ -23,8 +23,8 @@ command oc create -f master-hpc.yaml
 
 echo "..Takes some time to apply..Continuing with install.\n"
 
-echo "..Sleep for 10s..\n"
-sleep 10s
+echo "..Sleep for 200s..\n"
+sleep 200s
 
 # Check the helm installation.
 echo "\n\nChecking if Helm is installed...\n\n"
@@ -38,7 +38,7 @@ echo "\n\nkubectl good to go!...\n\n"
 
 # Log in to OpenShift with cluster-admin or kube-admin privileges!
 echo "Log in to cluster"
-command oc login --token=sha256~xxxxxxxFGLGhhet3mAXVLBfkSw --server=https://api.ocp4cluster.balarcert.com:6443
+command oc login --token=sha256~xxxxxxxFGLGhhet3mAXVLBfkSw --server=https://api.<clusterName>.<domainName>.com:6443
 
 ## Access k8s cluster.
 echo "\n\nStatus of nodes in the cluster....\n\n"
@@ -52,6 +52,7 @@ if [ $? -ne 0 ]; then
 	exit;
 fi
 
+# Confirm HugePages configuration
 echo "\n\nExamining huge pages config on each node..\n\n"
 echo "Guidelines: https://docs.weka.io/kubernetes/weka-operator-deployments#configure-hugepages-for-kubernetes-worker-nodes\n\n"
 
@@ -74,9 +75,9 @@ echo "Elevate permissions of weka-controller-manager and weka-operator-maintenan
 command oc adm policy add-scc-to-user privileged -z weka-operator-controller-manager -n weka-operator-system
 command oc adm policy add-scc-to-user privileged -z weka-operator-maintenance -n weka-operator-system
 
-echo "\n\nWeka operator deployment complete...\n\n"
+echo "\n\nWeka operator deployment complete...\nSleep for 25s\n"
 
-sleep 23s
+sleep 25s
 
 echo "\n\nExamining status of pods in weka-operator-system namespace...Pods should be up and running...\n\n"
 
@@ -89,15 +90,12 @@ if [ $? -ne 0 ]; then
         exit;
 fi
 
-echo "Elevate permissions of weka-controller-manager service account\n"
-command oc adm policy add-scc-to-user privileged -z weka-operator-controller-manager -n weka-operator-system
-
 echo "Create a wekaPolicy\n"
 command oc create -f wekapolicy.yaml
 
-echo "\n\nObserving progress of wekaPolicy...Condition is met if policy is in Done Status\n\n"
+echo "\n\nObserving progress of wekaPolicy...Condition is met if policy is in Done Status\nSleep for 50s\n"
 
-sleep 30s
+sleep 50s
 
 command kubectl --kubeconfig "${KUBECONFIG}" wait --for=jsonpath='{.status.status}'=Done wekapolicy/sign-drives --timeout=200s -n weka-operator-system
 
@@ -108,3 +106,66 @@ echo "\n\nPrint all nodes and the value of their weka.io/weka-drives annotation.
 command kubectl --kubeconfig "${KUBECONFIG}" get nodes -o custom-columns='NAME:.metadata.name,WEKADRIVES:.metadata.annotations.weka\.io/weka-drives'
 
 sleep 10s
+
+# Deploy a wekaCluster
+echo "\n\nDeploying wekaCluster weka-operator-system namespace...\n\n\n"
+
+command envsubst < wekacluster.yaml | kubectl apply -f -
+
+echo "\n\nManifest deployed...Wait for 8 to 9 minutes for everything to be running...\n\n"
+
+sleep 30s
+
+echo "\n\nFollowing along with the installation...\n\n"
+
+sleep 2s
+
+echo "\n\nObserving the status of wekacluster...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" get wekacluster -n weka-operator-system
+
+sleep 2s
+
+echo "\n\nTaking a look at pods in the install namespace...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" get pods -n weka-operator-system
+
+sleep 2s
+
+echo "\n\nNow we wait for 16 minutes, or until the wekacluster reports Ready status....\n\n"
+
+sleep 20s
+
+command kubectl --kubeconfig "${KUBECONFIG}" wait --for=jsonpath='{.status.status}'=Ready wekacluster/cluster1 --timeout=800s -n weka-operator-system 
+
+echo "\n\nSuccess! WekaCluster is up and running...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" get wekacluster -n weka-operator-system
+
+echo "\n\nCreating wekaclient with WEKA version ${WEKA_IMAGE_VERSION}...\n\n"
+
+command envsubst < wekaclient.yaml | kubectl apply -f -
+
+echo "\nPatching weka-operator-manager-role clusterRole...\n"
+
+command kubectl patch clusterrole weka-operator-manager-role --type='json' -p='[{"op": "add", "path": "/rules/0", "value": {"apiGroups": ["apps"], "resources": ["deployments/finalizers"], "verbs": ["update", "patch"]}}]'
+
+echo "\n\nWaiting for 8 minutes, or wekaclient to report Ready status...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" wait --for=jsonpath='{.status.status}'=Running wekaclient/cluster1-client --timeout=400s -n weka-operator-system
+
+echo "\n\nwekaClient is up and running!!Next, taking a look at pods in the install namespace...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" get pods -n weka-operator-system
+
+echo "\n\nCSI is also up and running!...\n\nTime to create a pod and PVC...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" create -f pvcandpod.yaml
+
+echo "\n\nWait for 100 seconds, or for pod and PVC to be ready...\n\n"
+
+command kubectl --kubeconfig "${KUBECONFIG}" wait --for=condition=Ready pod --all --timeout=100s --namespace default
+
+echo "Pod is running!!!\n\n\n\n\nYou can kubectl exec to the pod and write data at /data/demo!!!!!"
+
+echo "\n\n\nCongratulations!\n\n\n\n"
