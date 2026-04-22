@@ -1,10 +1,12 @@
 # WEKA on OpenShift
 
-This README explains the steps to be taken to deploy WEKA on OpenShift.
-
-[WEKA](https://www.weka.io/) is a high-performance filesystem that is fully containerized. Deploy and maintain storage clusters using the [WEKA Operator](https://docs.weka.io/kubernetes/composable-clusters-for-multi-tenancy-in-kubernetes). Clusters are YAML-based, making automation a reality.
+[WEKA](https://www.weka.io/) is a high-performance filesystem that is fully containerized. Deploy and maintain storage clusters using the [WEKA Operator](https://docs.weka.io/kubernetes/composable-clusters-for-multi-tenancy-in-kubernetes). 
 
 [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is an enterprise-grade container orchestrator, built and maintained by Red Hat.
+
+This repo explains how WEKA clusters can be deployed on OpenShift environments.
+
+WEKA clusters can also be deployed external to OpenShift environments. In such instances, one creates a [wekaClient](https://docs.weka.io/kubernetes/weka-operator-deployments#id-3.-install-the-wekaclient-cr) with `joinIpPorts` defined.
 
 ## How to use this repo
 
