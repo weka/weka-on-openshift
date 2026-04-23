@@ -1,0 +1,14 @@
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaClient
+metadata:
+  name: external-cluster-client #Define this value as desired
+spec:
+  image: quay.io/weka.io/weka-in-container:5.1.0 #Update to appropriate image
+  imagePullSecret: "quay-io-robot-secret" #Update to appropriate secret
+  driversDistService: "https://drivers.weka.io" #Set to this value for external accessible clusters
+  portRange:
+    basePort: 46000
+  wekaSecretRef: external-cluster #Set to name of secret that contains cluster access credentials
+  joinIpPorts: ["10.0.2.137:16101"] #Set to IP addresses used to join a cluster outside the local environment
+  network:
+    udpMode: true

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-weka
+spec:
+  volumes:
+  - name: vol1
+    persistentVolumeClaim:
+      claimName: weka-pvc
+  containers:
+  - name: busybox
+    image: busybox
+    command: [ "sh", "-c", "sleep 1h" ]
+    volumeMounts:
+    - name: vol1
+      mountPath: /data/demo
