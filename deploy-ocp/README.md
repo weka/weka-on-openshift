@@ -2,7 +2,7 @@
 
 This README walks you through the steps involved to deploy an OpenShift cluster.
 
-Use `deploy-ocp.sh` to spin up an OpenShift cluster on AWS.
+Clone this repo on an Amazon Linux `arm64` instance to use `deploy-ocp.sh`.
 
 This script uses `install-config.yaml` to provide config parameters.
 

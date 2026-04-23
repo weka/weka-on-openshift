@@ -10,17 +10,13 @@ WEKA clusters can also be deployed external to OpenShift environments. In such i
 
 ## How to use this repo
 
-This GitHub repository contains install scripts that may be used to deploy an OpenShift cluster, and to install a WEKA cluster.
+For specific instructions, click the links below:
 
-Clone this repo on an Amazon Linux `arm64` instance to use `deploy-ocp.sh`.
+[Deploying OpenShift](deploy-ocp/README.md)
 
-```
-###Deploy an OpenShift cluster####
-$ sh deploy-ocp/deploy-ocp.sh
+[Installing WEKA on OpenShift](install-weka-on-ocp/README.md)
 
-###Install WEKA on an OpenShift cluster###
-$ sh install-weka-on-ocp/install-weka-on-ocp.sh
-```
+[Configuring access to external WEKA storage for OpenShift](external-weka-to-ocp/README.md)
 
 ## Prerequisites
 
@@ -48,11 +44,3 @@ OpenShift uses CoreOS by default.
 Versions `v1.9.0` and later are known to work with OpenShift.
 
 It is **always** recommended to use the most recent available version of the WEKA Operator. Releases are published here: <https://get.weka.io/ui/operator>.
-
-For specific instructions, click the links below:
-
-[Deploying OpenShift](deploy-ocp/README.md)
-
-[Installing WEKA on OpenShift](install-weka-on-ocp/README.md)
-
-[Configuring access to external WEKA storage for OpenShift](external-weka-to-ocp/README.md)
