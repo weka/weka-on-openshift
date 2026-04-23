@@ -6,7 +6,9 @@
 
 This repo explains how WEKA clusters can be deployed on OpenShift environments.
 
-WEKA clusters can also be deployed external to OpenShift environments. In such instances, one creates a [wekaClient](https://docs.weka.io/kubernetes/weka-operator-deployments#id-3.-install-the-wekaclient-cr) with `joinIpPorts` defined.
+WEKA clusters can also be deployed external to OpenShift environments. In such instances, ONLY a WEKA Client must be deployed on OpenShift.
+
+Here, one creates a [wekaClient](https://docs.weka.io/kubernetes/weka-operator-deployments#id-3.-install-the-wekaclient-cr), with `joinIpPorts` defined.
 
 ## How to use this repo
 
@@ -71,9 +73,9 @@ It is **always** recommended to use the most recent available version of the WEK
 
 ![access-openshift-cluster](https://github.com/user-attachments/assets/83d84023-49ec-42da-aa33-7ca4548e3040)
 
-## Steps to deploy wekaCluster
+## Steps to deploy a wekaCluster in OpenShift
 
-Assuming a working OpenShift cluster is available, here are the steps to deploy a wekaCluster.
+Assuming a working OpenShift cluster is available, here are the steps to deploy a wekaCluster in OpenShift.
 
 ### 0.1 Make Control nodes scheduleable
 
@@ -293,3 +295,31 @@ pod/pod-weka   1/1     Running   0          21s
 ```
 
 The pod is up and running! You are ready for more serious workloads.
+
+## Addendum: Configuring access to external WEKA storage for OpenShift clusters
+
+Suppose you have a pre-existing WEKA cluster deployed.
+
+How would you provide OpenShift workloads access to storage from this external WEKA cluster?
+
+Simple!
+
+Create a `wekaClient` object in OpenShift, populating the values as shown below.
+
+```
+$ cat external-wekaclient.yaml
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaClient
+metadata:
+  name: external-cluster-client                  #Define this value as desired
+spec:
+  image: quay.io/weka.io/weka-in-container:5.1.0 #Update to appropriate image
+  imagePullSecret: "quay-io-robot-secret"        #Update to appropriate secret
+  driversDistService: "https://drivers.weka.io"  #Set to this value for external accessible clusters
+  portRange:
+    basePort: 46000
+  wekaSecretRef: weka-cluster-dev                #Set to name of secret that contains cluster access credentials
+  joinIpPorts: ["10.0.2.137:16101"]              #Set to IP addresses used to join a cluster outside the local environment
+  network:
+    ethDevice: mlnx0
+```
