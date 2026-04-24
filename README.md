@@ -12,11 +12,13 @@ WEKA clusters can also be deployed external to OpenShift environments. In such i
 
 For specific instructions, click the links below:
 
-[Deploying OpenShift](deploy-ocp/README.md)
+[Deploying OpenShift](deploy-ocp/README.md).
 
-[Installing WEKA on OpenShift](install-weka-on-ocp/README.md)
+[Installing WEKA on OpenShift](install-weka-on-ocp/README.md).
 
-[Configuring access to external WEKA storage for OpenShift](external-weka-to-ocp/README.md)
+[Configuring access to external WEKA storage for OpenShift](external-weka-to-ocp/README.md).
+
+[Best Practices](best-practices/README.md).
 
 ## Prerequisites
 
