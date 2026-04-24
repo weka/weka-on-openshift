@@ -1,0 +1,13 @@
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaPolicy
+metadata:
+  name: weka-drivers-dist
+  namespace: weka-operator-system
+spec:
+  type: enable-local-drivers-distribution
+  image: quay.io/weka.io/weka-in-container:5.1.0 # Use the target 5.x LTS version
+  imagePullSecret: "quay-io-robot-secret"
+  payload:
+    driverDistPayload:
+      builderPreRunScript: "apt-get update && apt-get install -y gcc-12"
+    interval: 1m

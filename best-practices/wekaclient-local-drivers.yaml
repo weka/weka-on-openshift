@@ -1,0 +1,16 @@
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaClient
+metadata:
+  name: airgapped-cluster-client
+spec:
+  image: quay.io/weka.io/weka-in-container:5.1.0
+  imagePullSecret: "quay-io-robot-secret"
+  driversDistService: "https://weka-drivers-dist.weka-operator-system.svc.cluster.local:60002"
+  portRange:
+    basePort: 46000
+  wekaSecretRef: airgapped-cluster
+  targetCluster:
+    name: airgapped-cluster
+    namespace: default
+  network:
+    udpMode: true

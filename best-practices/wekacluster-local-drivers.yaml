@@ -1,0 +1,17 @@
+apiVersion: weka.weka.io/v1alpha1
+kind: WekaCluster
+metadata:
+  name: airgapped-cluster
+  namespace: default
+spec:
+  template: dynamic
+  dynamicTemplate:
+    computeContainers: 6
+    driveContainers: 6
+    # Use containerCapacity for WEKA 5.1.0+ with drive sharing
+    containerCapacity: 1000
+  image: quay.io/weka.io/weka-in-container:5.1.0
+  driversDistService: "https://weka-drivers-dist.weka-operator-system.svc.cluster.local:60002" # For local drivers, set to "https://<name-of-wekapolicy>.<namespace-of-wekapolicy>.svc.cluster.local:60002"->
+  imagePullSecret: "quay-io-robot-secret"
+  network:
+    udpMode: true
