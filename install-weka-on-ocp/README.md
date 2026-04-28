@@ -173,7 +173,8 @@ $ oc create -f wekaclient-def.yaml
 ```
 
 >[!WARNING]
-> Ensure `udpMode: true` in your wekaClient definition.
+> If running OpenShift on Virtual Machines, ensure `udpMode: true` in your wekaClient definition.
+> For on-premises OpenShift clusters using Mellanox, DPDK can be used instead of UDP.
 
 > [!WARNING]
 > Version `v1.9.0` of WEKA operator requires a fix for CSI deployments to succeed.
