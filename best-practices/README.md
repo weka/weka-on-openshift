@@ -4,9 +4,10 @@ Listed below are some best practices to be mindful of when working with WEKA and
 
 ## Generally Applicable
 
-- ALWAYS set `network.udpMode=True` in your `wekaClient` and `wekaCluster` definition. Currently, WEKA is not qualified to use DPDK with OpenShift. This effort requires `SR-IOV` support in WEKA.
-- If workloads utilizing CPU cores exist in your OpenShift cluster, it is RECOMMENDED to set `cpuPolicy=Auto` in your `wekaClient` definition. This helps ensure workloads do not compete to utilize the same CPU cores.
-- If your OpenShift cluster is NOT air-gapped, set `spec.driversDistService="https://drivers.weka.io"` in your `wekaClient` and `wekaCluster` definitions. Required driver container images are retrieved from a public Internet endpoint, instead of being built locally.
+- **Using DPDK**: For OpenShift clusters running on-premises with Mellanox NICs, DPDK can be used. OMIT the `network.udpMode:true` in wekaCluster and wekaClient definitions in such scenarios.
+- **Using UDP**: If the underlying hardware is not capable of supporting DPDK, set `network.udpMode:true` in wekaCluster and wekaClient definition.
+- **Auto cpuPolicy**: If workloads utilizing CPU cores exist in your OpenShift cluster, it is RECOMMENDED to set `cpuPolicy=Auto` in your `wekaClient` definition. This helps ensure workloads do not compete to utilize the same CPU cores.
+- **Public drivers endpoint**: If your OpenShift cluster is NOT air-gapped, set `spec.driversDistService="https://drivers.weka.io"` in your `wekaClient` and `wekaCluster` definitions. Required driver container images are retrieved from a public Internet endpoint, instead of being built locally.
 
 ## Air-Gapped Installations
 
