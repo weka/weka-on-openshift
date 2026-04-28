@@ -12,5 +12,5 @@ spec:
   targetCluster:
     name: airgapped-cluster
     namespace: default
-  network:
-    udpMode: true
+  network: #[1-2] required if underlying h/w doesn't support DPDK.
+    udpMode: true #[2-2] required if underlying h/w doesn't support DPDK.

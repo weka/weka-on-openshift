@@ -10,5 +10,5 @@ spec:
     basePort: 46000
   wekaSecretRef: external-cluster #Set to name of secret that contains cluster access credentials
   joinIpPorts: ["10.0.2.137:16101"] #Set to IP addresses used to join a cluster outside the local environment
-  network:
-    udpMode: true
+  network: #[1-2] required if underlying h/w doesn't support DPDK.
+    udpMode: true #[2-2] required if underlying h/w doesn't support DPDK.
