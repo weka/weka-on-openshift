@@ -1,0 +1,101 @@
+additionalTrustBundlePolicy: Proxyonly
+apiVersion: v1
+baseDomain: balarcert.com
+credentialsMode: Manual
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+  name: worker
+  platform:
+    aws:
+      metadataService: {}
+      rootVolume:
+        iops: 0
+        size: 100
+        type: gp3
+      type: i4i.4xlarge
+      zones:
+      - us-east-2a
+  replicas: 3
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  platform:
+    aws:
+      metadataService: {}
+      rootVolume:
+        iops: 0
+pullSecret: '{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGweka-mkws4: shared
+DEBUG No matches in us-east-2 for kubernetes.io/cluster/ocpweka-mkws4: shared, removing client
+DEBUG Search for and remove tags in us-east-1 matching kubernetes.io/cluster/ocpweka-mkws4: shared
+DEBUG No matches in us-east-1 for kubernetes.io/cluster/ocpweka-mkws4: shared, removing client
+DEBUG Search for and remove shared tags for IAM roles matching kubernetes.io/cluster/ocpweka-mkws4: shared
+DEBUG iterating over a page of 100 IAM roles
+DEBUG iterating over a page of 93 IAM roles
+DEBUG Purging asset "Metadata" from disk
+DEBUG Purging asset "Master Ignition Customization Check" from disk
+DEBUG Purging asset "Arbiter Ignition Customization Check" from disk
+DEBUG Purging asset "Worker Ignition Customization Check" from disk
+DEBUG Purging asset "Kubeadmin Password" from disk
+DEBUG Purging asset "Certificate (journal-gatewayd)" from disk
+INFO Time elapsed: 19s
+INFO Uninstallation complete!
+[root@ip-172-31-45-137 ec2-user]# ./openshift-install create install-config
+INFO Credentials loaded from the AWS config using "EnvConfigCredentials" provider
+INFO Install-Config created in: .
+[root@ip-172-31-45-137 ec2-user]# vim install-config.yaml
+[root@ip-172-31-45-137 ec2-user]# cat install-config.yaml
+additionalTrustBundlePolicy: Proxyonly
+apiVersion: v1
+baseDomain: balarcert.com
+credentialsMode: Manual
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+  name: worker
+  platform:
+    aws:
+      metadataService: {}
+      rootVolume:
+        iops: 0
+        size: 100
+        type: gp3
+      type: i4i.4xlarge
+      zones:
+      - us-east-2a
+  replicas: 3
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  platform:
+    aws:
+      metadataService: {}
+      rootVolume:
+        iops: 0
+        size: 100
+        type: gp3
+      type: i4i.4xlarge
+      zones:
+      - us-east-2a
+  replicas: 3
+credentialsMode: Manual
+metadata:
+  name: ocpweka
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.0.0/16
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  aws:
+    ipFamily: IPv4
+    region: us-east-2
+    vpc: {}
+publish: External
+pullSecret: {$PULL_SECRET}
