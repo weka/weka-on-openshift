@@ -1,6 +1,7 @@
 additionalTrustBundlePolicy: Proxyonly
 apiVersion: v1
 baseDomain: ${DOMAIN} #To be replaced with your domain name. Use a Route53 domain in AWS.
+credentialsMode: Manual
 compute:
 - architecture: arm64
   hyperthreading: Enabled
